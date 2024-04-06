@@ -16,6 +16,7 @@ const games = {
     hl2: require('./games/hl2'),
     tf2: require('./games/tf2'),
     l4d2: require('./games/l4d2'),
+    cs2: require('./games/cs2'),
 };
 
 
