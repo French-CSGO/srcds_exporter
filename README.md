@@ -80,6 +80,7 @@ Values for `game` field :
 | Game   |      Value      |
 |:----------:|:-------------:|
 | Counter Strike: Global Offensive |  csgo |
+| Counter Strike 2 | cs2 |
 | Counter Strike: Source |    css   |
 | Garry's Mod |    gmod   |
 | Half Life 2 DM |    hl2   |
