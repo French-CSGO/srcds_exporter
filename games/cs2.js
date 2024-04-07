@@ -4,7 +4,7 @@ const { metrics } = require('../utils/metrics.js');
 
 const formatRconResult = function (result) {
     let { stats, status } = result;
-    //console.log(status);
+    console.log(stats);
     stats = stats.split(/\r?\n/);
     stats.pop();
     stats.shift();
@@ -14,13 +14,23 @@ const formatRconResult = function (result) {
     const sourceTVIndex = infosArray.findIndex(line => line.includes("'SourceTV'"));
     const TotalSlotsIndex = infosArray.findIndex(line => line.includes("Total Slots"));
     
+    let botCount = 0;
+
+    for (const line of infosArray) {
+    if (line.includes('BOT') && !line.includes('SourceTV')) {
+        botCount++;
+    }
+    }
+    
     status = {
         hostname: infosArray[5].split(': ').slice(1).join(': '),
         version: infosArray[7].split(': ')[1].split('/')[0],
         map: infosArray[14].split(': ')[3].split('| ')[0].trim(),
+        players: infosArray[12].split(': ')[1].split(' humans')[0].trim(),
         playerstv: infosArray[TotalSlotsIndex].split(', ')[1].split(' ')[1].trim(),
+        bot: botCount,
     }
-
+    
     if (sourceTVIndex !== -1) {
         stats[6] -= 1;
     }
@@ -50,8 +60,9 @@ const setMetrics = function (result, reqInfos) {
     metrics.uptime.set((Number(stats[3])));
     metrics.maps.set((Number(stats[4])));
     metrics.fps.set((Number(stats[5])));
-    metrics.players.set((Number(stats[6])));
+    metrics.players.set((Number(status.players)));
     metrics.playerstv.set((Number(status.playerstv)));
+    metrics.bot.set((Number(status.bot)));
 
     return cs2Registry.metrics();
 }

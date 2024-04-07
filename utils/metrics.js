@@ -26,6 +26,7 @@ const metrics = {
     connects: new Gauge({ name: "srcds_connects", help: "Number of players who connected on the server since it's boot", registers: [registries.gmodRegistry, registries.cssRegistry, registries.hl2Registry, registries.tf2Registry] }),
     users: new Gauge({ name: "srcds_users", help: "Number of users who connected on the server since it's boot", registers: [registries.l4d2Registry] }),
     playerstv: new Gauge({ name: "srcds_players_tv", help: "The servers's current TV players", registers: [registries.cs2Registry] }),
+    bot: new Gauge({ name: "srcds_bot", help: "The servers's current TV players", registers: [registries.cs2Registry] }),
 };
 
 module.exports = {
