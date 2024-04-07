@@ -11,15 +11,6 @@
     <img src="./images/l4d2.png" height="80">
     <img src="./images/tf2.png" height="80">
 </p>
-<p align="center">
-  <img src="https://img.shields.io/github/stars/unyxos/srcds_exporter?style=social">
-  <a href="https://hub.docker.com/r/corentincl/srcds_exporter" alt="Activity">
-    <img src="https://img.shields.io/docker/pulls/corentincl/srcds_exporter?logo=docker"/>
-  </a>
-  <img src="https://img.shields.io/docker/v/corentincl/srcds_exporter?logo=docker&sort=semver">
-  <img src="https://img.shields.io/docker/image-size/corentincl/srcds_exporter/latest?logo=docker">
-  <img src="https://img.shields.io/docker/stars/corentincl/srcds_exporter?logo=docker">
-</p>
 
 ## How to install
 
@@ -100,7 +91,3 @@ Grafana dashboards are being revamped and should be available soon!
 ### Support
 
 If you encounter any issue, feel free to open an issue.
-If you want to contact me :
-
-* Twitter : [@Unyxos](https://twitter.com/Unyxos)
-* Email : [me@corentincloss.fr](mailto://me@corentincloss.fr)
