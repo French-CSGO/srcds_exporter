@@ -1,5 +1,5 @@
 # CS2 Support
-**I can't tell if CS2 will be supported directly through the csgo config or if a new one will be needed, I'll need to have access to it and for Valve to release CS2 dedicated servers for everybody**
+**Request some file edit at all game update : `game/csgo_core/gameinfo.gi`  `DefensiveConCommands` to 0**
 
 # SRCDS Prometheus exporter
 ### The goal of this project is to provide a simple way to get metrics from various Source dedicated servers and expose them in Grafana.
@@ -24,7 +24,7 @@
 ## How to install
 
 ### Method 1 : With docker
-`docker run -d -p <external port>:9591 --name srcds_exporter --restart=always corentincl/srcds_exporter`
+`docker run -d -p <external port>:9591 --name srcds_exporter --restart=always ghcr.io/french-csgo/srcds_exporter`
 
 ### Method 2 : Download sources and run
 
