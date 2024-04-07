@@ -4,7 +4,7 @@ const { metrics } = require('../utils/metrics.js');
 
 const formatRconResult = function (result) {
     let { stats, status } = result;
-    console.log(stats);
+    //console.log(stats);
     stats = stats.split(/\r?\n/);
     stats.pop();
     stats.shift();
