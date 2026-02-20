@@ -1,6 +1,6 @@
 const { cs2Registry } = require('../utils/metrics.js').registries;
 const { metrics } = require('../utils/metrics.js');
-const { formatRconResult } = require('./utils/parseCs2');
+const { formatRconResult } = require('../utils/parseCs2');
 
 function setMetrics(result, reqInfos) {
   const { stats, status } = formatRconResult(result);
