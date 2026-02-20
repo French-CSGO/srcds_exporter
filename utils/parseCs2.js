@@ -111,12 +111,22 @@ function formatRconResult(result) {
   const { stats, status } = result;
 
   // Parse stats
-  let statsArr = [];
-  try {
+  
+let statsArr = [];
+try {
     const lines = stats.split(/\r?\n/).filter(Boolean);
-    const numeric = lines.find((l) => /^\s*\d+(\s+\d+)+/.test(l));
-    if (numeric) statsArr = numeric.trim().split(/\s+/);
-  } catch (_) {}
+
+    const numericLine = lines.find(l =>
+        /^\s*[0-9.]+(\s+[0-9.]+)+$/.test(l.trim())
+    );
+
+    if (numericLine) {
+        statsArr = numericLine.trim().split(/\s+/);
+    }
+} catch (e) {
+    statsArr = [];
+}
+
 
   const { headerLines, playersTable, tvBlocks } = splitSections(status);
 
