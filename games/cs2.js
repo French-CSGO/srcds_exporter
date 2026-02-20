@@ -1,85 +1,55 @@
 const { cs2Registry } = require('../utils/metrics.js').registries;
-
 const { metrics } = require('../utils/metrics.js');
+const { formatRconResult } = require('./utils/parseCs2');
 
-const formatRconResult = function (result) {
-    let { stats, status } = result;
-    //console.log(stats);
-    stats = stats.split(/\r?\n/);
-    stats.pop();
-    stats.shift();
-    stats = stats[0].trim().split(/\s+/);
+function setMetrics(result, reqInfos) {
+  const { stats, status } = formatRconResult(result);
 
-    const infosArray = status.split(/\r?\n/);
-    const sourceTVIndex = infosArray.findIndex(line => line.includes("'SourceTV'"));
-    const TotalSlotsIndex = infosArray.findIndex(line => line.includes("Total Slots"));
-    
-    let botCount = 0;
+  const defaultLabels = {
+    server: `${reqInfos.ip}:${reqInfos.port}`,
+    game: reqInfos.game,
+    version: status.version || 'unknown',
+    hostname: status.hostname || 'unknown',
+    map: status.map || 'unknown',
+  };
+  cs2Registry.setDefaultLabels(defaultLabels);
 
-    for (const line of infosArray) {
-    if (line.includes('BOT') && !line.includes('SourceTV')) {
-        botCount++;
-    }
-    }
-    
-    status = {
-        hostname: infosArray[5].split(': ').slice(1).join(': '),
-        version: infosArray[7].split(': ')[1].split('/')[0],
-        map: infosArray[14].split(': ')[3].split('| ')[0].trim(),
-        players: infosArray[12].split(': ')[1].split(' humans')[0].trim(),
-        playerstv: infosArray[TotalSlotsIndex].split(', ')[1].split(' ')[1].trim(),
-        bot: botCount,
-    }
-    
-    if (sourceTVIndex !== -1) {
-        stats[6] -= 1;
-    }
+  // stats: [cpu, netin, netout, uptime, maps, fps, ...]  → best effort
+  const num = (i, d = 0) => (stats[i] !== undefined ? Number(stats[i]) : d);
 
-    return {
-        stats,
-        status
-    };
+  metrics.status.set(1);
+  metrics.cpu.set(num(0));
+  metrics.netin.set(num(1));
+  metrics.netout.set(num(2));
+  metrics.uptime.set(num(3));
+  metrics.maps.set(num(4));
+  metrics.fps.set(num(5));
+
+  metrics.players.set(Number(status.players || 0));
+  // Si tu veux "playerstv" = spectateurs GOTV (ce que je recommande)
+  metrics.playerstv.set(Number(status.tv_spectators || 0));
+  metrics.bot.set(Number(status.bot || 0));
+
+  // Optionnel: exposer des compteurs séparés pour GOTV
+  if (metrics.gotv_total_slots) metrics.gotv_total_slots.set(Number(status.tv_total_slots || 0));
+  if (metrics.gotv_count) metrics.gotv_count.set(Number(status.tv_count || 0));
+
+  return cs2Registry.metrics();
 }
 
-const setMetrics = function (result, reqInfos) {
-    const { stats, status } = formatRconResult(result);
+function setNoMetrics(reqInfos) {
+  const defaultLabels = {
+    server: `${reqInfos.ip}:${reqInfos.port}`,
+    game: reqInfos.game,
+  };
+  // ⚠️ Correction: cs2Registry (pas csgoRegistry)
+  cs2Registry.setDefaultLabels(defaultLabels);
 
-    const defaultLabels = {
-        server: `${reqInfos.ip}:${reqInfos.port}`,
-        game: reqInfos.game,
-        version: status.version,
-        hostname: status.hostname,
-        map: status.map,
-    };
-    cs2Registry.setDefaultLabels(defaultLabels);
-
-    metrics.status.set((Number(1)));
-    metrics.cpu.set((Number(stats[0])));
-    metrics.netin.set((Number(stats[1])));
-    metrics.netout.set((Number(stats[2])));
-    metrics.uptime.set((Number(stats[3])));
-    metrics.maps.set((Number(stats[4])));
-    metrics.fps.set((Number(stats[5])));
-    metrics.players.set((Number(status.players)));
-    metrics.playerstv.set((Number(status.playerstv)));
-    metrics.bot.set((Number(status.bot)));
-
-    return cs2Registry.metrics();
-}
-
-setNoMetrics = function (reqInfos) {
-    const defaultLabels = {
-        server: `${reqInfos.ip}:${reqInfos.port}`,
-        game: reqInfos.game,
-    };
-    csgoRegistry.setDefaultLabels(defaultLabels);
-
-    metrics.status.set((Number(0)));
-
-    return csgoRegistry.metrics();
+  metrics.status.set(0);
+  return cs2Registry.metrics();
 }
 
 module.exports = {
-    setMetrics,
-    setNoMetrics
-}
+  setMetrics,
+  setNoMetrics,
+};
