@@ -8,12 +8,16 @@ function checkUpToDate(buildNumber) {
     if (!buildNumber) return resolve(0);
     const url = `https://api.steampowered.com/ISteamApps/UpToDateCheck/v1/?appid=730&version=${encodeURIComponent(buildNumber)}&format=json`;
     https.get(url, (res) => {
-      let data = '';
-      res.on('data', chunk => { data += chunk; });
+      if (res.statusCode !== 200) {
+        res.resume();
+        return resolve(0);
+      }
+      const chunks = [];
+      res.on('data', chunk => { chunks.push(chunk); });
       res.on('end', () => {
         try {
-          const json = JSON.parse(data);
-          resolve(json.response && json.response.up_to_date === true ? 1 : 0);
+          const json = JSON.parse(Buffer.concat(chunks).toString());
+          resolve(json.response && json.response.success && json.response.up_to_date === true ? 1 : 0);
         } catch {
           resolve(0);
         }
