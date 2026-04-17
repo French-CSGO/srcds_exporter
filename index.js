@@ -34,7 +34,7 @@ app.get('/metrics', validator.query(metricsParamsSchema), async (req, res) => {
         const stats = await client.command('stats');
 
         await client.disconnect();
-        const response = games[game].setMetrics({ stats, status }, { ip, port, game });
+        const response = await games[game].setMetrics({ stats, status }, { ip, port, game });
 
         res.end(response);
     } catch (err) {

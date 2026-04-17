@@ -1,8 +1,32 @@
+const https = require('https');
 const { cs2Registry } = require('../utils/metrics.js').registries;
 const { metrics } = require('../utils/metrics.js');
 const { formatRconResult } = require('../utils/parseCs2');
 
-function setMetrics(result, reqInfos) {
+function checkUpToDate(buildNumber) {
+  return new Promise((resolve) => {
+    if (!buildNumber) return resolve(0);
+    const url = `https://api.steampowered.com/ISteamApps/UpToDateCheck/v1/?appid=730&version=${encodeURIComponent(buildNumber)}&format=json`;
+    https.get(url, (res) => {
+      if (res.statusCode !== 200) {
+        res.resume();
+        return resolve(0);
+      }
+      const chunks = [];
+      res.on('data', chunk => { chunks.push(chunk); });
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(Buffer.concat(chunks).toString());
+          resolve(json.response && json.response.success && json.response.up_to_date === true ? 1 : 0);
+        } catch {
+          resolve(0);
+        }
+      });
+    }).on('error', () => resolve(0));
+  });
+}
+
+async function setMetrics(result, reqInfos) {
   const { stats, status } = formatRconResult(result);
 
   const defaultLabels = {
@@ -33,6 +57,9 @@ function setMetrics(result, reqInfos) {
   // Optionnel: exposer des compteurs séparés pour GOTV
   if (metrics.gotv_total_slots) metrics.gotv_total_slots.set(Number(status.tv_total_slots || 0));
   if (metrics.gotv_count) metrics.gotv_count.set(Number(status.tv_count || 0));
+
+  const upToDate = await checkUpToDate(status.buildNumber);
+  metrics.up_to_date.set(upToDate);
 
   return cs2Registry.metrics();
 }
