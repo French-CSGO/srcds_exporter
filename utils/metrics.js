@@ -60,6 +60,12 @@ const metrics = {
         help: "Sum of Total Slots across all GOTV instances",
         registers: [registries.cs2Registry]
     }),
+
+    up_to_date: new Gauge({
+        name: "srcds_up_to_date",
+        help: "1 if the server is up to date according to Steam API, 0 otherwise",
+        registers: [registries.cs2Registry]
+    }),
 };
 
 module.exports = {

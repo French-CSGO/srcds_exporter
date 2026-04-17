@@ -9,6 +9,7 @@ function parseHeader(lines) {
   const header = {
     hostname: null,
     version: null,
+    buildNumber: null,
     humans: null,
     botsReported: null,
   };
@@ -17,8 +18,15 @@ function parseHeader(lines) {
     if (!header.hostname)
       header.hostname = safeMatch(line, /^hostname\s*:\s*(.+)$/);
 
-    if (!header.version)
-      header.version = safeMatch(line, /^version\s*:\s*([0-9.]+)/);
+    if (!header.version) {
+      const m = line.match(/^version\s*:\s*([0-9.]+)\/(\d+)/);
+      if (m) {
+        header.version = m[1];
+        header.buildNumber = m[2];
+      } else {
+        header.version = safeMatch(line, /^version\s*:\s*([0-9.]+)/);
+      }
+    }
 
     if (header.humans === null || header.botsReported === null) {
       const m = line.match(/^players\s*:\s*(\d+)\s+humans,\s*(\d+)\s+bots/i);
@@ -151,6 +159,7 @@ try {
     status: {
       hostname: header.hostname,
       version: header.version,
+      buildNumber: header.buildNumber,
       map,
       players: pt.humans !== 0 ? pt.humans : (header.humans ?? 0),
       bot: (pt.botsNonTV !== 0 ? pt.botsNonTV : (header.botsReported ?? 0)),
