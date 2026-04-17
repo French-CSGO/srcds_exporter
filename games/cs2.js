@@ -29,10 +29,13 @@ function checkUpToDate(buildNumber) {
 async function setMetrics(result, reqInfos) {
   const { stats, status } = formatRconResult(result);
 
+  const upToDate = await checkUpToDate(status.buildNumber);
+
   const defaultLabels = {
     server: `${reqInfos.ip}:${reqInfos.port}`,
     game: reqInfos.game,
     version: status.version || 'unknown',
+    up_to_date: upToDate === 1 ? 'true' : 'false',
     hostname: status.hostname || 'unknown',
     map: status.map || 'unknown',
   };
@@ -58,7 +61,6 @@ async function setMetrics(result, reqInfos) {
   if (metrics.gotv_total_slots) metrics.gotv_total_slots.set(Number(status.tv_total_slots || 0));
   if (metrics.gotv_count) metrics.gotv_count.set(Number(status.tv_count || 0));
 
-  const upToDate = await checkUpToDate(status.buildNumber);
   metrics.up_to_date.set(upToDate);
 
   return cs2Registry.metrics();
@@ -68,6 +70,10 @@ function setNoMetrics(reqInfos) {
   const defaultLabels = {
     server: `${reqInfos.ip}:${reqInfos.port}`,
     game: reqInfos.game,
+    version: 'unknown',
+    up_to_date: 'false',
+    hostname: 'unknown',
+    map: 'unknown',
   };
   // ⚠️ Correction: cs2Registry (pas csgoRegistry)
   cs2Registry.setDefaultLabels(defaultLabels);
