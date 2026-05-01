@@ -66,6 +66,12 @@ const metrics = {
         help: "1 if the server is up to date according to Steam API, 0 otherwise",
         registers: [registries.cs2Registry]
     }),
+
+    rcon_rtt: new Gauge({
+        name: "srcds_rcon_rtt_ms",
+        help: "Round-trip time of the RCON connection in milliseconds",
+        registers: [registries.csgoRegistry, registries.cs2Registry, registries.gmodRegistry, registries.cssRegistry, registries.hl2Registry, registries.tf2Registry, registries.l4d2Registry]
+    }),
 };
 
 module.exports = {

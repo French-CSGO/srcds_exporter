@@ -28,13 +28,15 @@ app.get('/metrics', validator.query(metricsParamsSchema), async (req, res) => {
     const { ip, port, password, game } = req.query;
 
     try {
+        const rttStart = Date.now();
         const client = await connect(ip, port, password, 5 * 1000);
 
         const status = await client.command('status');
         const stats = await client.command('stats');
+        const rtt = Date.now() - rttStart;
 
         await client.disconnect();
-        const response = await games[game].setMetrics({ stats, status }, { ip, port, game });
+        const response = await games[game].setMetrics({ stats, status, rtt }, { ip, port, game });
 
         res.end(response);
     } catch (err) {
