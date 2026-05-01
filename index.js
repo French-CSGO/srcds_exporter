@@ -4,6 +4,7 @@ const process = require('process');
 const { connect } = require('@unyxos/working-rcon');
 const validator = require('express-joi-validation').createValidator({});
 const express = require('express');
+const ping = require('ping');
 const app = express();
 
 const { metricsParamsSchema } = require('./utils/joi-schema');
@@ -28,7 +29,12 @@ app.get('/metrics', validator.query(metricsParamsSchema), async (req, res) => {
     const { ip, port, password, game } = req.query;
 
     try {
-        const rttStart = Date.now();
+        const [pingResult, rttStart] = await Promise.all([
+            ping.promise.probe(ip, { timeout: 5 }),
+            Promise.resolve(Date.now()),
+        ]);
+        const icmpMs = pingResult.alive ? parseFloat(pingResult.time) : -1;
+
         const client = await connect(ip, port, password, 5 * 1000);
 
         const status = await client.command('status');
@@ -36,7 +42,7 @@ app.get('/metrics', validator.query(metricsParamsSchema), async (req, res) => {
         const rtt = Date.now() - rttStart;
 
         await client.disconnect();
-        const response = await games[game].setMetrics({ stats, status, rtt }, { ip, port, game });
+        const response = await games[game].setMetrics({ stats, status, rtt, icmpMs }, { ip, port, game });
 
         res.end(response);
     } catch (err) {
