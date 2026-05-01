@@ -73,11 +73,6 @@ const metrics = {
         registers: [registries.csgoRegistry, registries.cs2Registry, registries.gmodRegistry, registries.cssRegistry, registries.hl2Registry, registries.tf2Registry, registries.l4d2Registry]
     }),
 
-    icmp_ping: new Gauge({
-        name: "srcds_icmp_ping_ms",
-        help: "ICMP ping latency to the server host in milliseconds, -1 if unreachable",
-        registers: [registries.csgoRegistry, registries.cs2Registry, registries.gmodRegistry, registries.cssRegistry, registries.hl2Registry, registries.tf2Registry, registries.l4d2Registry]
-    }),
 };
 
 module.exports = {

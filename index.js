@@ -1,25 +1,10 @@
 require('dotenv').config();
 
 const process = require('process');
-const net = require('net');
 const { connect } = require('@unyxos/working-rcon');
 const validator = require('express-joi-validation').createValidator({});
 const express = require('express');
 const app = express();
-
-function tcpPing(host, port, timeoutMs = 3000) {
-    return new Promise((resolve) => {
-        const start = Date.now();
-        const socket = new net.Socket();
-        socket.setTimeout(timeoutMs);
-        socket.connect(Number(port), host, () => {
-            resolve(Date.now() - start);
-            socket.destroy();
-        });
-        socket.on('error', () => resolve(-1));
-        socket.on('timeout', () => { socket.destroy(); resolve(-1); });
-    });
-}
 
 const { metricsParamsSchema } = require('./utils/joi-schema');
 const logger = require('./utils/logging');
@@ -43,8 +28,6 @@ app.get('/metrics', validator.query(metricsParamsSchema), async (req, res) => {
     const { ip, port, password, game } = req.query;
 
     try {
-        const icmpMs = await tcpPing(ip, port);
-
         const client = await connect(ip, port, password, 5 * 1000);
         const rttStart = Date.now();
 
@@ -53,7 +36,7 @@ app.get('/metrics', validator.query(metricsParamsSchema), async (req, res) => {
         const rtt = Date.now() - rttStart;
 
         await client.disconnect();
-        const response = await games[game].setMetrics({ stats, status, rtt, icmpMs }, { ip, port, game });
+        const response = await games[game].setMetrics({ stats, status, rtt }, { ip, port, game });
 
         res.end(response);
     } catch (err) {

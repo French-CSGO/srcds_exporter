@@ -29,7 +29,6 @@ function checkUpToDate(buildNumber) {
 async function setMetrics(result, reqInfos) {
   const { stats, status } = formatRconResult(result);
   const rtt = result.rtt ?? 0;
-  const icmpMs = result.icmpMs ?? -1;
 
   const upToDate = await checkUpToDate(status.buildNumber);
 
@@ -65,7 +64,6 @@ async function setMetrics(result, reqInfos) {
 
   metrics.up_to_date.set(upToDate);
   metrics.rcon_rtt.set(rtt);
-  metrics.icmp_ping.set(icmpMs);
 
   return cs2Registry.metrics();
 }
