@@ -1,11 +1,25 @@
 require('dotenv').config();
 
 const process = require('process');
+const net = require('net');
 const { connect } = require('@unyxos/working-rcon');
 const validator = require('express-joi-validation').createValidator({});
 const express = require('express');
-const ping = require('ping');
 const app = express();
+
+function tcpPing(host, port, timeoutMs = 3000) {
+    return new Promise((resolve) => {
+        const start = Date.now();
+        const socket = new net.Socket();
+        socket.setTimeout(timeoutMs);
+        socket.connect(Number(port), host, () => {
+            resolve(Date.now() - start);
+            socket.destroy();
+        });
+        socket.on('error', () => resolve(-1));
+        socket.on('timeout', () => { socket.destroy(); resolve(-1); });
+    });
+}
 
 const { metricsParamsSchema } = require('./utils/joi-schema');
 const logger = require('./utils/logging');
@@ -29,13 +43,10 @@ app.get('/metrics', validator.query(metricsParamsSchema), async (req, res) => {
     const { ip, port, password, game } = req.query;
 
     try {
-        const [pingResult, rttStart] = await Promise.all([
-            ping.promise.probe(ip, { timeout: 5 }),
-            Promise.resolve(Date.now()),
-        ]);
-        const icmpMs = pingResult.alive ? parseFloat(pingResult.time) : -1;
+        const icmpMs = await tcpPing(ip, port);
 
         const client = await connect(ip, port, password, 5 * 1000);
+        const rttStart = Date.now();
 
         const status = await client.command('status');
         const stats = await client.command('stats');

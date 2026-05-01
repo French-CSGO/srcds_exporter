@@ -24,7 +24,6 @@
     "express-basic-auth": "^1.2.1",
     "express-joi-validation": "^5.0.1",
     "joi": "^17.6.0",
-    "ping": "^1.0.0",
     "pino": "^7.9.2",
     "pino-pretty": "^7.6.0",
     "prom-client": "^11.5.3"
