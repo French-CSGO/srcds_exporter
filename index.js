@@ -1,5 +1,14 @@
 require('dotenv').config();
 
+function withTimeout(promise, ms, label) {
+    return Promise.race([
+        promise,
+        new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(`${label} timeout after ${ms}ms`)), ms)
+        ),
+    ]);
+}
+
 const process = require('process');
 const { connect } = require('@unyxos/working-rcon');
 const validator = require('express-joi-validation').createValidator({});
@@ -39,8 +48,8 @@ app.get('/metrics', validator.query(metricsParamsSchema), async (req, res) => {
         const client = await connect(resolvedIp, port, password, 5 * 1000);
         const rttStart = Date.now();
 
-        const status = await client.command('status');
-        const stats = await client.command('stats');
+        const status = await withTimeout(client.command('status'), 3000, 'status');
+        const stats = await withTimeout(client.command('stats'), 3000, 'stats');
         const rtt = Date.now() - rttStart;
 
         await client.disconnect();
